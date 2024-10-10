@@ -9,8 +9,8 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 #include "TLC5947.h"
-#include "time.h"
 #include "secrets.h"
+#include <vector>
 
 // Replace with your network credentials
 const char *ssid = SECRET_SSID;
@@ -34,6 +34,7 @@ TLC5947 tlc(DEVICES, CLOCK, DATA, LATCH, BLANK);
 
 const int ZERO_B = 0;   //  zero brightness
 const int MAX_B = 4095; //  100% brightness
+const int MID_B = 1000; //  ~20% brightness
 int a = MAX_B;          //  current brightness
 
 // structure of stop location important variables
@@ -42,34 +43,36 @@ struct stopLocationStruct
   float lat;
   float lon;
   String name;
+  int LEDindex;
 };
 
-// initialize an array of all blue and green line stops
-stopLocationStruct stopLocations[] = {
-    {44.854277, -93.238877, "Mall of America Station"},
-    {44.855876, -93.231499, "30th Ave Station"},
-    {44.856369, -93.226485, "Bloomington Central Station"},
-    {44.859536, -93.223109, "American Blvd Station"},
-    {44.874119, -93.224068, "Terminal 2 Station"},
-    {44.88077, -93.204922, "Terminal 1 Station"},
-    {44.893222, -93.198084, "Fort Snelling Station"},
-    {44.90279, -93.202266, "VA Medical Center Station"},
-    {44.912429, -93.210163, "50th St Minnehaha Station"},
-    {44.920758, -93.219847, "46th St Station"},
-    {44.934655, -93.229449, "38th St Station"},
-    {44.94836, -93.238864, "Lake St - Midtown Station"},
-    {44.962525, -93.247027, "Franklin Ave Station"},
-    {44.968406, -93.251029, "Cedar Riverside Station"},
-    {44.975101, -93.259722, "U.S. Bank Stadium Station"},
-    {44.976863, -93.265879, "Government Plaza Station"},
-    {44.978597, -93.269919, "Nicollet Mall Station"},
-    {44.980177, -93.273202, "Warehouse District Hennepin Ave Station"},
-    {44.983045, -93.277453, "Target Field Station Platform 1"},
-    {44.983543, -93.278703, "Target Field Station Platform 2'"}};
+// initialize an array of all blue line stops
+stopLocationStruct blueLineStopLocations[] = {
+    {44.854277, -93.238877, "Mall of America Station", 0},
+    {44.855876, -93.231499, "30th Ave Station", 1},
+    {44.856369, -93.226485, "Bloomington Central Station", 2},
+    {44.859536, -93.223109, "American Blvd Station", 3},
+    {44.874119, -93.224068, "Terminal 2 Station", 4},
+    {44.88077, -93.204922, "Terminal 1 Station", 5},
+    {44.893222, -93.198084, "Fort Snelling Station", 6},
+    {44.90279, -93.202266, "VA Medical Center Station", 7},
+    {44.912429, -93.210163, "50th St Minnehaha Station", 8},
+    {44.920758, -93.219847, "46th St Station", 9},
+    {44.934655, -93.229449, "38th St Station", 10},
+    {44.94836, -93.238864, "Lake St - Midtown Station", 11},
+    {44.962525, -93.247027, "Franklin Ave Station", 12},
+    {44.968406, -93.251029, "Cedar Riverside Station", 13},
+    {44.975101, -93.259722, "U.S. Bank Stadium Station", 14},
+    {44.976863, -93.265879, "Government Plaza Station", 15},
+    {44.978597, -93.269919, "Nicollet Mall Station", 16},
+    {44.980177, -93.273202, "Warehouse District Hennepin Ave Station", 17},
+    {44.983045, -93.277453, "Target Field Station Platform 1", 18},
+};
+const int blueLineStopCount = sizeof(blueLineStopLocations) / sizeof(blueLineStopLocations[0]);
 
 unsigned long epochTime;
 String jsonBuffer;
-String serverName = "https://svc.metrotransit.org/nextrip/vehicles";
+String serverName = "https://svc.metrotransit.org/nextrip/vehicles/";
 String routeIDs[] = {
     "901", // Blue line
     "902", // Green line
@@ -140,7 +143,7 @@ void setup()
       Serial.print(" = ");
       Serial.println(a);
     }
-    a = (a > ZERO_B) ? ZERO_B : MAX_B;
+    a = (a > MID_B) ? MID_B : MAX_B;
   }
 }
 
@@ -190,20 +193,6 @@ String apiCall(const char *serverName)
   }
 }
 
-// function to get current time from NTP server
-unsigned long getTime()
-{
-  time_t now;
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo))
-  {
-    Serial.println("Failed to obtain time");
-    return (0);
-  }
-  time(&now);
-  return now;
-}
-
 // function to do the distance formula between two coordinates and convert the answer into feet
 float coordDistance(float lat1, float lon1, float lat2, float lon2)
 {
@@ -216,14 +205,19 @@ float coordDistance(float lat1, float lon1, float lat2, float lon2)
   return sqrt(dlat * dlat + dlon * dlon) * meterPerDegree;
 }
 
+// function to set LEDs to be off
+void clearLEDS()
+{
+  for (int i = 0; i < blueLineStopCount; i++)
+  {
+    tlc.setPWM(blueLineStopLocations[i].LEDindex, ZERO_B);
+  }
+}
+
 void loop()
 {
-  epochTime = getTime();
-  Serial.println(epochTime);
 
-  Serial.println(coordDistance(44.854277, -93.238877, 44.983543, -93.278703));
-  // for (int thisStop = 0; thisStop < stopCount; thisStop++)
-  // {
+  // Serial.println(coordDistance(44.854277, -93.238877, 44.983543, -93.278703));
   String extendedServerName = (serverName + routeIDs[0]);
   jsonBuffer = apiCall(extendedServerName.c_str());
   JSONVar myObject = JSON.parse(jsonBuffer);
@@ -234,28 +228,58 @@ void loop()
     return;
   }
   delay(1000);
-  //   Serial.print("Departures: ");
-  //   Serial.println(myObject["departures"][0]);
-  //   int departureTime = int(myObject["departures"][0]["departure_time"]);
-  //   Serial.print("epochTime is :");
-  //   Serial.println(epochTime);
-  //   Serial.print("relative time is:");
-  //   Serial.println(departureTime - epochTime);
-  // if (departureTime - epochTime < 300)
-  // {
-  //   analogWrite(pins[thisStop], 255);
-  // }
-  // else
-  // {
-  //   analogWrite(pins[thisStop], 0);
-  // }
-  // }
-  //     Serial.print("JSON object = ");
-  // Serial.println(myObject);
-  // Serial.print("Departures: ");
-  // Serial.println(myObject["departures"]);
+  clearLEDS();
+  // Serial.print("Train number: ");
+  // Serial.println(myObject[0]["trip_id"]);
+  // Serial.print("Latitude: ");
+  // Serial.println(myObject[0]["latitude"]);
+  // Serial.print("Longitude: ");
+  // Serial.println(myObject[0]["longitude"]);
+  for (int i = 0; i < myObject.length(); i++)
+  {
+    float minDistance = 100000000; // needs to be arbitarily long
+    String nearestStop;
+    int nearestStopLEDindex;
+    String directionOfMotion;
+    for (int j = 0; j < blueLineStopCount; j++)
+    {
+      // cast the lat and long to float from the JSON
+      float trainLat = (double)myObject[i]["latitude"];
+      float trainLon = (double)myObject[i]["longitude"];
+      directionOfMotion = JSON.stringify(myObject[i]["direction"]);
+
+      float currentDistance = coordDistance(trainLat, trainLon, blueLineStopLocations[j].lat, blueLineStopLocations[j].lon);
+      // Serial.println(currentDistance);
+      if (currentDistance < minDistance)
+      {
+        minDistance = currentDistance;
+        nearestStop = blueLineStopLocations[j].name;
+        nearestStopLEDindex = blueLineStopLocations[j].LEDindex;
+      }
+    }
+    Serial.print("The ");
+    Serial.print(myObject[i]["direction"]);
+    Serial.print(" ");
+    Serial.print(myObject[i]["trip_id"]);
+    Serial.print(" train is ");
+    Serial.print(minDistance);
+    Serial.print(" meters away from ");
+    Serial.println(nearestStop);
+    Serial.print("Light up LED ");
+    Serial.println(nearestStopLEDindex);
+    if (directionOfMotion == "\"SB\"")
+    {
+      Serial.println("Southbound");
+      tlc.setPWM(nearestStopLEDindex, MID_B);
+    }
+    else
+    {
+      tlc.setPWM(nearestStopLEDindex, MAX_B);
+    }
+  }
+  tlc.write();
 
   Serial.println();
-  Serial.println("Waiting 1min before the next round...");
-  delay(60000);
+  Serial.println("Waiting 2min before the next round...");
+  delay(120000);
 }
