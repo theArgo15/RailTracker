@@ -10,10 +10,11 @@
 #include <Arduino_JSON.h>
 #include "TLC5947.h"
 #include "time.h"
+#include "secrets.h"
 
 // Replace with your network credentials
-const char *ssid = "Snozzberries";
-const char *password = "pinkpotato003";
+const char *ssid = SECRET_SSID;
+const char *password = SECRET_PASS;
 
 const char *ntpServer = "pool.ntp.org";
 
@@ -70,8 +71,8 @@ unsigned long epochTime;
 String jsonBuffer;
 String serverName = "https://svc.metrotransit.org/nextrip/vehicles";
 String routeIDs[] = {
-    "901",
-    "902",
+    "901", // Blue line
+    "902", // Green line
 };
 int stopCount = 6;
 // www.howsmyssl.com root certificate authority, to verify the server
@@ -223,16 +224,16 @@ void loop()
   Serial.println(coordDistance(44.854277, -93.238877, 44.983543, -93.278703));
   // for (int thisStop = 0; thisStop < stopCount; thisStop++)
   // {
-  //   String extendedServerName = (serverName + stopIDs[thisStop]);
-  //   jsonBuffer = apiCall(extendedServerName.c_str());
-  //   JSONVar myObject = JSON.parse(jsonBuffer);
-  //   // JSON.typeof(jsonVar) can be used to get the type of the var
-  //   if (JSON.typeof(myObject) == "undefined")
-  //   {
-  //     Serial.println("Parsing input failed!");
-  //     return;
-  //   }
-  //   delay(1000);
+  String extendedServerName = (serverName + routeIDs[0]);
+  jsonBuffer = apiCall(extendedServerName.c_str());
+  JSONVar myObject = JSON.parse(jsonBuffer);
+  // JSON.typeof(jsonVar) can be used to get the type of the var
+  if (JSON.typeof(myObject) == "undefined")
+  {
+    Serial.println("Parsing input failed!");
+    return;
+  }
+  delay(1000);
   //   Serial.print("Departures: ");
   //   Serial.println(myObject["departures"][0]);
   //   int departureTime = int(myObject["departures"][0]["departure_time"]);
