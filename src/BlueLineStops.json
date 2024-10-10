@@ -1,0 +1,102 @@
+[
+  {
+    "stop_id": 51405,
+    "stop_name": "Mall of America Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51437,
+    "stop_name": "30th Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51436,
+    "stop_name": "Bloomington Central Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 53280,
+    "stop_name": "American Blvd Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51435,
+    "stop_name": "Terminal 2 Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51434,
+    "stop_name": "Terminal 1 Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51433,
+    "stop_name": "Fort Snelling Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51432,
+    "stop_name": "VA Medical Center Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51431,
+    "stop_name": "50th St/ Minnehaha Park Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51430,
+    "stop_name": "46th St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51429,
+    "stop_name": "38th St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51428,
+    "stop_name": "Lake St/ Midtown Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51427,
+    "stop_name": "Franklin Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51426,
+    "stop_name": "Cedar-Riverside Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56330,
+    "stop_name": "U.S. Bank Stadium Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51424,
+    "stop_name": "Government Plaza Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51423,
+    "stop_name": "Nicollet Mall Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56332,
+    "stop_name": "Warehouse District/ Hennepin Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56333,
+    "stop_name": "Target Field Station Platform 1",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56339,
+    "stop_name": "Target Field Station Platform 2",
+    "timepoint": true
+  }
+]

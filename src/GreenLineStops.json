@@ -1,0 +1,122 @@
+[
+  {
+    "stop_id": 56334,
+    "stop_name": "Target Field Station Platform 2",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56335,
+    "stop_name": "Target Field Station Platform 1",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56336,
+    "stop_name": "Warehouse District/ Hennepin Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51408,
+    "stop_name": "Nicollet Mall Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 51409,
+    "stop_name": "Government Plaza Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56338,
+    "stop_name": "U.S. Bank Stadium Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56001,
+    "stop_name": "West Bank Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56002,
+    "stop_name": "East Bank Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56003,
+    "stop_name": "Stadium Village Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56004,
+    "stop_name": "Prospect Park Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56005,
+    "stop_name": "Westgate Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56006,
+    "stop_name": "Raymond Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56007,
+    "stop_name": "Fairview Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56008,
+    "stop_name": "Snelling Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56009,
+    "stop_name": "Hamline Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56010,
+    "stop_name": "Lexington Pkwy Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56011,
+    "stop_name": "Victoria St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56012,
+    "stop_name": "Dale St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56013,
+    "stop_name": "Western Ave Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56014,
+    "stop_name": "Capitol/Rice St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56015,
+    "stop_name": "Robert St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56016,
+    "stop_name": "10th St Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56017,
+    "stop_name": "Central Station",
+    "timepoint": true
+  },
+  {
+    "stop_id": 56018,
+    "stop_name": "Union Depot Station",
+    "timepoint": true
+  }
+]
