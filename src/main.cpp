@@ -179,17 +179,17 @@ void setup()
 String apiCall(const char *serverName)
 {
   String payload;
-  WiFiClientSecure *client = new WiFiClientSecure;
+  WiFiClientSecure client;
   if (client)
   {
     // set secure client with certificate
-    client->setCACert(rootCACertificate);
+    client.setCACert(rootCACertificate);
     // create an HTTPClient instance
     HTTPClient https;
 
     // Initializing an HTTPS communication using the secure client
     Serial.print("[HTTPS] begin...\n");
-    if (https.begin(*client, serverName))
+    if (https.begin(client, serverName))
     { // HTTPS
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
