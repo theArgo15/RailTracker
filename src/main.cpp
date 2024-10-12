@@ -19,11 +19,11 @@ const char *password = SECRET_PASS;
 const char *ntpServer = "pool.ntp.org";
 
 // TLC5947 stuff
-int DEVICES = 2; //  set Amount of TLC5947 Boards
+const int DEVICES = 2; //  set Amount of TLC5947 Boards
 
-int led = 24 * DEVICES; //  this set Amount of LEDs per Board
+const int led = 24 * DEVICES; //  this set Amount of LEDs per Board
 
-int wait = 100; //  set time between channel control
+const int wait = 100; //  set time between channel control
 
 const int DATA = 26;
 const int CLOCK = 25;
@@ -179,17 +179,17 @@ void setup()
 String apiCall(const char *serverName)
 {
   String payload;
-  WiFiClientSecure client;
+  WiFiClientSecure *client = new WiFiClientSecure;
   if (client)
   {
     // set secure client with certificate
-    client.setCACert(rootCACertificate);
+    client->setCACert(rootCACertificate);
     // create an HTTPClient instance
     HTTPClient https;
 
     // Initializing an HTTPS communication using the secure client
     Serial.print("[HTTPS] begin...\n");
-    if (https.begin(client, serverName))
+    if (https.begin(*client, serverName))
     { // HTTPS
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
@@ -219,6 +219,7 @@ String apiCall(const char *serverName)
       Serial.printf("[HTTPS] Unable to connect\n");
     }
   }
+  delete client;
 }
 
 // function to do the distance formula between two coordinates and convert the answer into feet
@@ -249,51 +250,45 @@ void loop()
   // loop of all lines of interest
   for (int k = 0; k < 2; k++)
   {
+    std::vector<stopLocationStruct> stopLocations = allLineStopLocations.at(k);
     String extendedServerName = (serverName + routeIDs[k]);
     jsonBuffer = apiCall(extendedServerName.c_str());
-    JSONVar myObject = JSON.parse(jsonBuffer);
+    JSONVar trainsJson = JSON.parse(jsonBuffer);
     // JSON.typeof(jsonVar) can be used to get the type of the var
-    if (JSON.typeof(myObject) == "undefined")
+    if (JSON.typeof(trainsJson) == "undefined")
     {
       Serial.println("Parsing input failed!");
       return;
     }
-    delay(1000);
     clearLEDS(k);
-    // Serial.print("Train number: ");
-    // Serial.println(myObject[0]["trip_id"]);
-    // Serial.print("Latitude: ");
-    // Serial.println(myObject[0]["latitude"]);
-    // Serial.print("Longitude: ");
-    // Serial.println(myObject[0]["longitude"]);
     // loop for all trains on line
-    for (int i = 0; i < myObject.length(); i++)
+    for (int i = 0; i < trainsJson.length(); i++)
     {
       float minDistance = 100000000; // needs to be arbitarily long
       String nearestStop;
       int nearestStopLEDindex;
       String directionOfMotion;
+      // cast the lat and long to float from the JSON
+      float trainLat = (double)trainsJson[i]["latitude"];
+      float trainLon = (double)trainsJson[i]["longitude"];
       // loop of all stops on line
-      for (int j = 0; j < allLineStopLocations.at(0).size(); j++)
+      for (const stopLocationStruct &stopLocation : stopLocations)
       {
-        // cast the lat and long to float from the JSON
-        float trainLat = (double)myObject[i]["latitude"];
-        float trainLon = (double)myObject[i]["longitude"];
-        directionOfMotion = JSON.stringify(myObject[i]["direction"]);
+        directionOfMotion = JSON.stringify(trainsJson[i]["direction"]);
 
-        float currentDistance = coordDistance(trainLat, trainLon, allLineStopLocations.at(k).at(j).lat, allLineStopLocations.at(k).at(j).lon);
+        float currentDistance = coordDistance(trainLat, trainLon, stopLocation.lat, stopLocation.lon);
         // Serial.println(currentDistance);
         if (currentDistance < minDistance)
         {
           minDistance = currentDistance;
-          nearestStop = allLineStopLocations.at(k).at(j).name;
-          nearestStopLEDindex = allLineStopLocations.at(k).at(j).LEDindex;
+          nearestStop = stopLocation.name;
+          nearestStopLEDindex = stopLocation.LEDindex;
         }
       }
       Serial.print("The ");
-      Serial.print(myObject[i]["direction"]);
+      Serial.print(trainsJson[i]["direction"]);
       Serial.print(" ");
-      Serial.print(myObject[i]["trip_id"]);
+      Serial.print(trainsJson[i]["trip_id"]);
       Serial.print(" train is ");
       Serial.print(minDistance);
       Serial.print(" meters away from ");
