@@ -33,9 +33,11 @@ const int LATCH = 32;
 TLC5947 tlc(DEVICES, CLOCK, DATA, LATCH, BLANK);
 
 const int ZERO_B = 0;   //  zero brightness
-const int MAX_B = 4095; //  100% brightness
-const int MID_B = 1000; //  ~20% brightness
+const int MAX_B = 1000; //  100% brightness is 4095
+const int MID_B = 250;  //  10% brightness
 int a = MAX_B;          //  current brightness
+
+const int indicatorLED = 42;
 
 // structure of stop location important variables
 struct stopLocationStruct
@@ -171,10 +173,32 @@ void setup()
       Serial.print(" = ");
       Serial.println(a);
     }
+    delay(1000);
     a = (a > ZERO_B) ? ZERO_B : MAX_B;
   }
 }
 
+// function to light up an indicator LED
+void raiseLED(int LEDpin)
+{
+  int brightness = 100;
+  tlc.setPWM(LEDpin, brightness);
+  delay(wait);
+  tlc.write();
+}
+// function to blink an indicator LED
+void blinkLED(int LEDpin)
+{
+  int brightness = 1000;
+  for (int i = 0; i < 2; i++)
+  {
+
+    tlc.setPWM(LEDpin, brightness);
+    delay(wait);
+    tlc.write();
+    brightness = ZERO_B;
+  }
+}
 // function for API calls
 String apiCall(const char *serverName)
 {
@@ -204,12 +228,15 @@ String apiCall(const char *serverName)
         {
           // print server response payload
           payload = https.getString();
+          blinkLED(indicatorLED);
           https.end();
+          delete client;
           return payload;
         }
         else
         {
           Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+          raiseLED(indicatorLED);
         }
         https.end();
       }
@@ -217,9 +244,9 @@ String apiCall(const char *serverName)
     else
     {
       Serial.printf("[HTTPS] Unable to connect\n");
+      raiseLED(indicatorLED);
     }
   }
-  delete client;
 }
 
 // function to do the distance formula between two coordinates and convert the answer into feet
@@ -231,7 +258,8 @@ float coordDistance(float lat1, float lon1, float lat2, float lon2)
   const float coslat = .70810068;
   float dlat = lat1 - lat2;
   float dlon = (lon1 - lon2) * coslat;
-  return sqrt(dlat * dlat + dlon * dlon) * meterPerDegree;
+  // return sqrt(dlat * dlat + dlon * dlon) * meterPerDegree; //use this line to get actual distances
+  return (dlat * dlat + dlon * dlon) * meterPerDegree; // sqrt is computationally expensive, so return distance squared instead
 }
 
 // function to set LEDs to be off
@@ -264,7 +292,7 @@ void loop()
     // loop for all trains on line
     for (int i = 0; i < trainsJson.length(); i++)
     {
-      float minDistance = 100000000; // needs to be arbitarily long
+      float minDistance = 100000000; // needs to be arbitarily high
       String nearestStop;
       int nearestStopLEDindex;
       String directionOfMotion;
@@ -285,6 +313,7 @@ void loop()
           nearestStopLEDindex = stopLocation.LEDindex;
         }
       }
+      // minDistance = sqrt(minDistance); //Uncomment if actual distance needed
       Serial.print("The ");
       Serial.print(trainsJson[i]["direction"]);
       Serial.print(" ");
@@ -308,6 +337,6 @@ void loop()
     tlc.write();
   }
   Serial.println();
-  Serial.println("Waiting 2min before the next round...");
-  delay(120000);
+  Serial.println("Waiting 45 seconds before the next round...");
+  delay(45000);
 }
